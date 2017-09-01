@@ -43,8 +43,8 @@ static void __exit dnsproxy_stop(void)
 
 	list_for_each_entry_safe(node, tmp, &dns_cache.list, list) {
 		list_del(&node->list);
-		kfree(node->name); 
-		kfree(node->answer); 
+		kfree(node->name);
+		kfree(node->answer);
 		kfree(node);
 	}
 
@@ -72,7 +72,7 @@ static uint32_t get_datalen_question(struct QUESTION *dnsq)
 
 // replying on dns questions from cache
 static uint32_t hook_post(void *priv, struct sk_buff *skb,
-			      const struct nf_hook_state *state)
+                          const struct nf_hook_state *state)
 {
 	struct iphdr     *ip_h;
 	struct udphdr    *udp_h;
@@ -87,7 +87,7 @@ static uint32_t hook_post(void *priv, struct sk_buff *skb,
 	// eth check
 	if (skb->protocol != htons(ETH_P_IP))
 		return NF_ACCEPT;
-	
+
 	// udp check
 	ip_h = ip_hdr(skb);
 	if (ip_h->protocol != IPPROTO_UDP)
@@ -100,11 +100,11 @@ static uint32_t hook_post(void *priv, struct sk_buff *skb,
 
 	// dns
 	dns_h = (struct HEADER *)
-		(skb->data + (ip_h->ihl * 4) + UPD_HDRLEN);
+	        (skb->data + (ip_h->ihl * 4) + UPD_HDRLEN);
 
 	// dns question
 	dns_q = (struct QUESTION *)
-		(skb->data + (ip_h->ihl * 4) + UPD_HDRLEN + DNS_HDRLEN);
+	        (skb->data + (ip_h->ihl * 4) + UPD_HDRLEN + DNS_HDRLEN);
 	dns_q_qnamelen = get_datalen_question(dns_q);
 	if (dns_q_qnamelen <= 0) {
 		return NF_ACCEPT;
@@ -116,17 +116,17 @@ static uint32_t hook_post(void *priv, struct sk_buff *skb,
 		cache_node->dns_id = ntohs(dns_h->id);
 
 		send_reply_dnspacket(skb, ip_h->saddr, udp_h->source,
-				     ip_h->daddr, cache_node);
+		                     ip_h->daddr, cache_node);
 		printk(KERN_INFO"dnsproxy sending dns reply packet from cache\n");
 		return NF_DROP;
-	} 
+	}
 
 	return NF_ACCEPT;
 }
 
 // storing dns answers from packets to cache
 static uint32_t hook_pre(void *priv, struct sk_buff *skb,
-			      const struct nf_hook_state *state)
+                         const struct nf_hook_state *state)
 {
 	struct iphdr    *ip_h;
 	struct udphdr   *udp_h;
@@ -157,11 +157,11 @@ static uint32_t hook_pre(void *priv, struct sk_buff *skb,
 		return NF_ACCEPT;
 
 	dns_h = (struct HEADER *)
-		(skb->data + (ip_h->ihl * 4) + UPD_HDRLEN);
+	        (skb->data + (ip_h->ihl * 4) + UPD_HDRLEN);
 	answer_count = ntohs(dns_h->an_count);
 
 	dns_q = (struct QUESTION *)
-		(skb->data + (ip_h->ihl * 4) + UPD_HDRLEN + DNS_HDRLEN);
+	        (skb->data + (ip_h->ihl * 4) + UPD_HDRLEN + DNS_HDRLEN);
 
 	dns_q_qnamelen = get_datalen_question(dns_q);
 	if (dns_q_qnamelen <= 0) {
@@ -169,13 +169,13 @@ static uint32_t hook_pre(void *priv, struct sk_buff *skb,
 	}
 
 	dns__a = (struct _ANSWER *)
-		 (skb->data + (ip_h->ihl * 4) + UPD_HDRLEN + DNS_HDRLEN +
-		 (dns_q_qnamelen + DNS_Q_CONSTLEN) + DNS_A_OFFSET);
+	         (skb->data + (ip_h->ihl * 4) + UPD_HDRLEN + DNS_HDRLEN +
+	          (dns_q_qnamelen + DNS_Q_CONSTLEN) + DNS_A_OFFSET);
 
 	// dns answer
 	dns_a = (struct ANSWER *)
-		(skb->data + (ip_h->ihl * 4) + UPD_HDRLEN + DNS_HDRLEN +
-		(dns_q_qnamelen + DNS_Q_CONSTLEN));
+	        (skb->data + (ip_h->ihl * 4) + UPD_HDRLEN + DNS_HDRLEN +
+	         (dns_q_qnamelen + DNS_Q_CONSTLEN));
 
 	dns_a_len = get_datalen_answer(answer_count);
 	if (dns_a_len <= 0) {
@@ -185,11 +185,11 @@ static uint32_t hook_pre(void *priv, struct sk_buff *skb,
 	cache_node = search_cache((uint8_t*)dns_q);
 	if (!cache_node) {
 		printk(KERN_INFO "dnsproxy adding to cache \n");
-		cache_node = add_to_cache((uint8_t *)dns_q, dns_q_qnamelen, 
-					  (uint8_t *)dns_a, dns_a_len);
+		cache_node = add_to_cache((uint8_t *)dns_q, dns_q_qnamelen,
+		                          (uint8_t *)dns_a, dns_a_len);
 		if (cache_node)
 			cache_node->answer_count = answer_count;
-		else 
+		else
 			printk(KERN_INFO "dnsproxy add_to_cache error\n");
 	}
 
@@ -203,8 +203,8 @@ static uint32_t get_datalen_answer(uint32_t dns_answer_count)
 
 // sending dns packet
 static void send_reply_dnspacket(struct sk_buff *in_skb, uint32_t dst_ip,
-				 uint32_t dst_port, uint32_t src_ip,
-				 struct dns_cache_node *node)
+                                 uint32_t dst_port, uint32_t src_ip,
+                                 struct dns_cache_node *node)
 {
 	struct sk_buff   *nskb;
 	struct iphdr     *ip_h;
@@ -293,8 +293,8 @@ static void send_reply_dnspacket(struct sk_buff *in_skb, uint32_t dst_ip,
 	//UDP HEADER continuation
 	udp_h->check  = 0;
 	udp_h->check  = csum_tcpudp_magic(src_ip, dst_ip,
-	                                 udp_len, IPPROTO_UDP,
-	                                 csum_partial(udp_h, udp_len, 0));
+	                                  udp_len, IPPROTO_UDP,
+	                                  csum_partial(udp_h, udp_len, 0));
 
 	if (ip_route_me_harder(module_ns_net, nskb, RTN_UNSPEC)) {
 		printk (KERN_ERR "\ndnsproxy ip_route_me_harder error");
@@ -304,8 +304,8 @@ static void send_reply_dnspacket(struct sk_buff *in_skb, uint32_t dst_ip,
 	dst_output(module_ns_net, NULL, nskb);
 }
 
-static struct dns_cache_node * add_to_cache(uint8_t *name, uint32_t name_len, 
-                                            uint8_t *answer, uint32_t answer_len)
+static struct dns_cache_node * add_to_cache(uint8_t *name, uint32_t name_len,
+        uint8_t *answer, uint32_t answer_len)
 {
 	struct dns_cache_node *node_ptr;
 
@@ -342,7 +342,7 @@ static struct dns_cache_node * search_cache(uint8_t *name)
 	return NULL;
 }
 
-MODULE_LICENSE("GPL"); 
+MODULE_LICENSE("GPL");
 module_init(dnsproxy_start);
 module_exit(dnsproxy_stop);
 

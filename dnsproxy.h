@@ -29,11 +29,10 @@
 /* --------------------------- functions ------------------------------------*/
 
 /* Structure of Header DNS */
-struct HEADER
-{
+struct HEADER {
 	uint16_t id;       // identification number
 
-	/* flags */ 
+	/* flags */
 	uint8_t qr     :1; // query/response flag
 	uint8_t opcode :4; // purpose of message
 	uint8_t aa     :1; // authoritive answer
@@ -45,7 +44,7 @@ struct HEADER
 	uint8_t cd     :1; // checking disabled
 	uint8_t rcode  :4; // response code
 
-	/* count */ 
+	/* count */
 	uint16_t qd_count; // number of question entries
 	uint16_t an_count; // number of answer entries
 	uint16_t ns_count; // number of authority entries
@@ -53,22 +52,19 @@ struct HEADER
 };
 
 /* Constant sized fields of Question structure */
-struct _QUESTION
-{
+struct _QUESTION {
 	uint16_t q_type;
 	uint16_t q_class;
 };
 
 /* Structure of a Question DNS */
-struct QUESTION
-{
+struct QUESTION {
 	uint8_t *q_name;
 	struct _QUESTION *question;
 };
 
 /* Constant sized fields of Answer structure */
-struct _ANSWER
-{
+struct _ANSWER {
 	uint16_t type;
 	uint16_t _class;
 	uint32_t   ttl;       // number of seconds
@@ -76,8 +72,7 @@ struct _ANSWER
 };
 
 /* Structure of a Answer DNS */
-struct ANSWER
-{
+struct ANSWER {
 	uint8_t *name;
 	struct _ANSWER *answer;
 	uint8_t *rdata;
@@ -96,8 +91,8 @@ struct dns_cache_node {
 };
 
 /* --------------------------- functions ------------------------------------*/
-static struct dns_cache_node * add_to_cache(uint8_t *name, uint32_t name_len, 
-                                            uint8_t *answer, uint32_t answer_len);
+static struct dns_cache_node * add_to_cache(uint8_t *name, uint32_t name_len,
+        uint8_t *answer, uint32_t answer_len);
 static struct dns_cache_node * search_cache(uint8_t *name);
 
 static uint32_t get_datalen_question(struct QUESTION *dnsq);
